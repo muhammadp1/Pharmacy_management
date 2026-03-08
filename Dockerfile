@@ -1,14 +1,29 @@
-# Step 1: Use official Eclipse Temurin OpenJDK 17 image
-FROM eclipse-temurin:17-jdk
+# Use official Eclipse Temurin OpenJDK 17 image with Maven
+FROM maven:3.9.2-eclipse-temurin-17 AS build
 
-# Step 2: Set working directory inside container
+# Set working directory
 WORKDIR /app
 
-# Step 3: Copy the jar file into the container
-COPY target/Pharmacy_mgmt-0.0.1-SNAPSHOT.jar app.jar
+# Copy pom.xml and download dependencies first (cached)
+COPY pom.xml .
+RUN mvn dependency:go-offline
 
-# Step 4: Expose port (Spring Boot default)
+# Copy the source code
+COPY src ./src
+
+# Build the jar
+RUN mvn clean package -DskipTests
+
+# Use a smaller OpenJDK image for running
+FROM eclipse-temurin:17-jdk
+
+WORKDIR /app
+
+# Copy the jar from the build stage
+COPY --from=build /app/target/Pharmacy_mgmt-0.0.1-SNAPSHOT.jar app.jar
+
+# Expose port
 EXPOSE 8080
 
-# Step 5: Run the Spring Boot application
+# Run the app
 ENTRYPOINT ["java", "-jar", "app.jar"]

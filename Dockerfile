@@ -6,7 +6,7 @@ WORKDIR /app
 
 # Step 3: Copy the jar file into the container
 # Make sure your backend jar is built already using 'mvn clean package'
-COPY target/Pharmacy_mgmt-0.0.1-SNAPSHOT.jar
+COPY target/Pharmacy_mgmt-0.0.1-SNAPSHOT.jar app.jar
 
 # Step 4: Expose port (Spring Boot default)
 EXPOSE 8080
